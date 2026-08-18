@@ -16,7 +16,12 @@ import {
 } from "@shared/tableDesign";
 
 function loadConstraints(): ProductionConstraints {
-  const configPath = path.resolve(import.meta.dirname, "..", "config", "production-constraints.json");
+  // Resolve from the project root (process.cwd()) rather than import.meta.dirname:
+  // the production server is bundled to CommonJS (dist/index.cjs), where
+  // import.meta.dirname is unavailable. npm scripts (dev and start) are always
+  // invoked from the project root, so process.cwd() is a stable anchor in both
+  // dev (tsx) and production (bundled cjs) modes.
+  const configPath = path.resolve(process.cwd(), "config", "production-constraints.json");
   const raw = fs.readFileSync(configPath, "utf-8");
   return JSON.parse(raw) as ProductionConstraints;
 }
