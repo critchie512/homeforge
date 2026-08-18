@@ -1,0 +1,55 @@
+{
+  "$comment": "PLACEHOLDER MANUFACTURABILITY LIMITS. These numbers are NOT real engineering values — actual printer/production limits are still unknown at the time this file was written. Every field here exists so the validation engine and the UI read limits from configurable data instead of hard-coded constants. Replace with real values once the manufacturing team confirms machine/process specs, then bump `revision` and note the change in docs/DECISIONS.md.",
+  "revision": "placeholder-v1",
+  "units": {
+    "dimensions": "mm",
+    "wallThickness": "mm",
+    "weight": "kg",
+    "printTime": "hours"
+  },
+  "dimensions": {
+    "width": { "min": 600, "max": 1800, "$comment": "PLACEHOLDER — coffee table width range" },
+    "depth": { "min": 400, "max": 1000, "$comment": "PLACEHOLDER — coffee table depth range" },
+    "height": { "min": 350, "max": 550, "$comment": "PLACEHOLDER — coffee table height range" }
+  },
+  "structure": {
+    "minWallThicknessMm": 4,
+    "maxWallThicknessMm": 20,
+    "defaultWallThicknessMm": 8,
+    "minLegDiameterMm": 30,
+    "$comment": "PLACEHOLDER — wall/leg thickness bounds for print strength; pending real slicer/material data"
+  },
+  "materials": [
+    {
+      "id": "pla-matte",
+      "label": "Matte PLA",
+      "densityKgPerM3": 1240,
+      "printSpeedFactor": 1.0,
+      "$comment": "PLACEHOLDER density/speed factor used only to compute estimated weight & print time"
+    },
+    {
+      "id": "petg-tough",
+      "label": "Tough PETG",
+      "densityKgPerM3": 1270,
+      "printSpeedFactor": 1.15,
+      "$comment": "PLACEHOLDER"
+    },
+    {
+      "id": "recycled-composite",
+      "label": "Recycled Wood-Fiber Composite",
+      "densityKgPerM3": 1180,
+      "printSpeedFactor": 1.3,
+      "$comment": "PLACEHOLDER"
+    }
+  ],
+  "finishes": [
+    { "id": "charcoal", "label": "Charcoal" },
+    { "id": "warm-oak", "label": "Warm Oak" },
+    { "id": "forge-orange", "label": "Forge Orange" },
+    { "id": "bone-white", "label": "Bone White" }
+  ],
+  "estimation": {
+    "baseHoursPerLiter": 6.5,
+    "$comment": "PLACEHOLDER — rough hours-per-liter-of-material heuristic for the estimated print time shown to customers. Not derived from a real slicer."
+  }
+}
