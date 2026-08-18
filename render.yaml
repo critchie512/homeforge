@@ -1,0 +1,20 @@
+databases:
+  - name: homeforge-db
+    plan: free
+    region: oregon
+
+services:
+  - type: web
+    name: homeforge
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm run db:push && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: homeforge-db
+          property: connectionString

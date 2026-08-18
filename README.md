@@ -76,6 +76,18 @@ npm start
 
 `npm run build` bundles the client into `dist/public` and the server into `dist/index.cjs`; `npm start` runs the production server (`NODE_ENV=production`).
 
+## Deploying to Render
+
+A `render.yaml` blueprint is included at the repo root, provisioning a free-tier Postgres database and a free-tier Node web service wired together automatically.
+
+1. Push this repo to GitHub (already done if you're reading this on GitHub).
+2. In the Render dashboard: **New → Blueprint**, select this repository, and Render will read `render.yaml` and create both the `homeforge-db` Postgres instance and the `homeforge` web service.
+3. Render injects `DATABASE_URL` automatically from the database into the web service's environment (no manual copy/paste needed).
+4. On every deploy, `npm run db:push` runs before `npm start`, so schema changes sync automatically. This is safe to run repeatedly (it only adds/updates, never drops data).
+5. Once live, your app is reachable at the `*.onrender.com` URL Render assigns (or a custom domain you attach in the Render dashboard).
+
+Note: Render's free-tier web services spin down after inactivity and take a few seconds to cold-start on the next request — expect a brief delay on the first hit after idle time.
+
 ## Project structure
 
 ```
