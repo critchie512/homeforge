@@ -1,3 +1,8 @@
+databases:
+  - name: homeforge-db
+    plan: starter
+    region: oregon
+
 services:
   - type: web
     name: homeforge
@@ -10,4 +15,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: homeforge-db
+          property: connectionString
