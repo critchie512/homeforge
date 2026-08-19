@@ -48,6 +48,33 @@
     { "id": "forge-orange", "label": "Forge Orange" },
     { "id": "bone-white", "label": "Bone White" }
   ],
+  "sizePresets": [
+    {
+      "id": "compact",
+      "label": "Compact",
+      "description": "Fits small living rooms and apartments",
+      "widthMm": 800,
+      "depthMm": 500,
+      "heightMm": 400
+    },
+    {
+      "id": "standard",
+      "label": "Standard",
+      "description": "Our most popular size for typical living rooms",
+      "widthMm": 1100,
+      "depthMm": 600,
+      "heightMm": 420
+    },
+    {
+      "id": "large",
+      "label": "Large",
+      "description": "A statement piece for larger living spaces",
+      "widthMm": 1500,
+      "depthMm": 750,
+      "heightMm": 450
+    }
+  ],
+  "$comment_sizePresets": "PRODUCT DECISION (not a printer limit): customers choose from these three supported/approved sizes rather than free-form width/depth/height sliders. Each preset's dimensions still fall within the dimensions.* min/max bounds above, so validateTableDesign() continues to check every preset against real manufacturability limits. Add or adjust presets here — never hard-code them in the client.",
   "estimation": {
     "baseHoursPerLiter": 6.5,
     "$comment": "PLACEHOLDER — rough hours-per-liter-of-material heuristic for the estimated print time shown to customers. Not derived from a real slicer."

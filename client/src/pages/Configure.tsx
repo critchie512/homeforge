@@ -8,7 +8,6 @@ import { TablePreview } from "@/components/TablePreview";
 import { ValidationPanel } from "@/components/ValidationPanel";
 import { getFinishPreviewColor } from "@/lib/finishColors";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2, ChevronLeft, ChevronRight, Save } from "lucide-react";
@@ -16,15 +15,17 @@ import {
   DEFAULT_TABLE_PARAMS,
   TOP_SHAPES,
   BASE_STYLES,
+  applySizePreset,
   validateTableDesign,
   type TableParams,
   type ProductionConstraints,
+  type SizePreset,
   type ValidationResult,
 } from "@shared/tableDesign";
 import type { DesignVersion, Project } from "@shared/schema";
 
 const STEPS: StepDef[] = [
-  { key: "dimensions", label: "Dimensions", description: "Width, depth, height" },
+  { key: "dimensions", label: "Size", description: "Choose a supported size" },
   { key: "top", label: "Top", description: "Shape of the tabletop" },
   { key: "base", label: "Base", description: "Legs or pedestal style" },
   { key: "material", label: "Material / Color", description: "Print material & finish" },
@@ -91,7 +92,7 @@ export default function Configure() {
   const goBack = () => setStepIndex((i) => Math.max(i - 1, 0));
 
   const finishColor = getFinishPreviewColor(params.finishId);
-  const dims = constraintsQuery.data?.dimensions;
+  const sizePresets = constraintsQuery.data?.sizePresets;
 
   return (
     <div className="min-h-screen">
@@ -121,8 +122,8 @@ export default function Configure() {
             </div>
 
             <div className="rounded-xl border border-card-border bg-card p-6">
-              {stepIndex === 0 && dims && (
-                <DimensionsStep params={params} dims={dims} onChange={update} />
+              {stepIndex === 0 && sizePresets && (
+                <SizeStep params={params} presets={sizePresets} onChange={update} />
               )}
               {stepIndex === 1 && <TopStep params={params} onChange={update} />}
               {stepIndex === 2 && <BaseStep params={params} onChange={update} />}
@@ -181,82 +182,47 @@ export default function Configure() {
   );
 }
 
-function DimensionsStep({
+function SizeStep({
   params,
-  dims,
+  presets,
   onChange,
 }: {
   params: TableParams;
-  dims: ProductionConstraints["dimensions"];
+  presets: SizePreset[];
   onChange: (patch: Partial<TableParams>) => void;
 }) {
   return (
-    <div className="space-y-8">
-      <DimensionSlider
-        label="Width"
-        value={params.widthMm}
-        min={dims.width.min}
-        max={dims.width.max}
-        onChange={(v) => onChange({ widthMm: v })}
-        testId="width"
-      />
-      <DimensionSlider
-        label="Depth"
-        value={params.depthMm}
-        min={dims.depth.min}
-        max={dims.depth.max}
-        onChange={(v) => onChange({ depthMm: v })}
-        testId="depth"
-      />
-      <DimensionSlider
-        label="Height"
-        value={params.heightMm}
-        min={dims.height.min}
-        max={dims.height.max}
-        onChange={(v) => onChange({ heightMm: v })}
-        testId="height"
-      />
-    </div>
-  );
-}
-
-function DimensionSlider({
-  label,
-  value,
-  min,
-  max,
-  onChange,
-  testId,
-}: {
-  label: string;
-  value: number;
-  min: number;
-  max: number;
-  onChange: (v: number) => void;
-  testId: string;
-}) {
-  return (
     <div>
-      <div className="mb-2 flex items-center justify-between">
-        <Label htmlFor={`slider-${testId}`}>{label}</Label>
-        <span className="text-sm font-medium tabular-nums" data-testid={`text-${testId}-value`}>
-          {value} mm
-        </span>
-      </div>
-      <Slider
-        id={`slider-${testId}`}
-        value={[value]}
-        min={min}
-        max={max}
-        step={10}
-        onValueChange={([v]) => onChange(v)}
-        data-testid={`slider-${testId}`}
-        aria-label={label}
-      />
-      <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
-        <span>{min}mm min</span>
-        <span>{max}mm max</span>
-      </div>
+      <Label className="mb-1 block">Size</Label>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Every HomeForge table ships in one of these supported sizes — each one is pre-approved
+        against our production limits, so there's nothing to second-guess.
+      </p>
+      <RadioGroup
+        value={params.sizePresetId}
+        onValueChange={(id) => {
+          const preset = presets.find((p) => p.id === id);
+          if (preset) onChange(applySizePreset(preset));
+        }}
+        className="grid gap-3 sm:grid-cols-3"
+      >
+        {presets.map((preset) => (
+          <label
+            key={preset.id}
+            className={`hover-elevate flex cursor-pointer flex-col gap-2 rounded-lg border p-4 ${
+              params.sizePresetId === preset.id ? "border-primary" : "border-card-border"
+            }`}
+            data-testid={`option-size-${preset.id}`}
+          >
+            <RadioGroupItem value={preset.id} className="sr-only" />
+            <span className="text-sm font-medium">{preset.label}</span>
+            <span className="text-xs text-muted-foreground">{preset.description}</span>
+            <span className="mt-1 text-xs font-medium tabular-nums text-primary">
+              {preset.widthMm} × {preset.depthMm} × {preset.heightMm} mm
+            </span>
+          </label>
+        ))}
+      </RadioGroup>
     </div>
   );
 }
@@ -440,9 +406,15 @@ function ReviewStep({
     <div className="space-y-4">
       <h3 className="text-sm font-medium text-muted-foreground">Summary</h3>
       <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-        <SummaryItem label="Width" value={`${params.widthMm} mm`} plain />
-        <SummaryItem label="Depth" value={`${params.depthMm} mm`} plain />
-        <SummaryItem label="Height" value={`${params.heightMm} mm`} plain />
+        <SummaryItem
+          label="Size"
+          value={
+            constraints?.sizePresets.find((p) => p.id === params.sizePresetId)?.label ??
+            params.sizePresetId
+          }
+          plain
+        />
+        <SummaryItem label="Dimensions" value={`${params.widthMm} × ${params.depthMm} × ${params.heightMm} mm`} plain />
         <SummaryItem label="Top" value={TOP_SHAPE_LABELS[params.topShape] ?? params.topShape} plain />
         <SummaryItem label="Base" value={BASE_STYLE_LABELS[params.baseStyle] ?? params.baseStyle} plain />
         <SummaryItem

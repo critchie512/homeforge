@@ -17,6 +17,13 @@ export const BASE_STYLES = ["pedestal", "four-leg", "trestle"] as const;
 export type BaseStyle = (typeof BASE_STYLES)[number];
 
 export interface TableParams {
+  // A customer picks one of the supported/approved size presets below
+  // (see ProductionConstraints.sizePresets) rather than setting width,
+  // depth, and height independently. widthMm/depthMm/heightMm are always
+  // kept in sync with the selected sizePresetId and remain the values the
+  // 3D preview and validateTableDesign() actually consume, so nothing
+  // downstream needs to change to support presets.
+  sizePresetId: string;
   widthMm: number;
   depthMm: number;
   heightMm: number;
@@ -27,6 +34,7 @@ export interface TableParams {
 }
 
 export const DEFAULT_TABLE_PARAMS: TableParams = {
+  sizePresetId: "standard",
   widthMm: 1100,
   depthMm: 600,
   heightMm: 420,
@@ -35,6 +43,29 @@ export const DEFAULT_TABLE_PARAMS: TableParams = {
   materialId: "pla-matte",
   finishId: "warm-oak",
 };
+
+export interface SizePreset {
+  id: string;
+  label: string;
+  description: string;
+  widthMm: number;
+  depthMm: number;
+  heightMm: number;
+}
+
+/** Apply a size preset, syncing sizePresetId with the mm fields that
+ * TablePreview and validateTableDesign() read. */
+export function applySizePreset(preset: SizePreset): Pick<
+  TableParams,
+  "sizePresetId" | "widthMm" | "depthMm" | "heightMm"
+> {
+  return {
+    sizePresetId: preset.id,
+    widthMm: preset.widthMm,
+    depthMm: preset.depthMm,
+    heightMm: preset.heightMm,
+  };
+}
 
 // --- Production constraints -------------------------------------------------
 // Shape mirrors config/production-constraints.json exactly. Loaded from disk
@@ -63,6 +94,7 @@ export interface ProductionConstraints {
     printSpeedFactor: number;
   }>;
   finishes: Array<{ id: string; label: string }>;
+  sizePresets: SizePreset[];
   estimation: {
     baseHoursPerLiter: number;
   };
