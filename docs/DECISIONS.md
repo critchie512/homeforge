@@ -1,11 +1,13 @@
-# HomeForge — Decisions & Open Questions
+# NestForge Studio — Decisions & Open Questions
 
 This document records the locked product/architecture decisions that shaped this build, plus one genuinely open UX question that was never resolved and should not be guessed at.
 
+> **2026-08-19 update:** The product owner (Chris Ritchie) provided three real ChatGPT-generated product mockups — a pre-ship qualification sticker, a build-instruction reference sheet, and the NestForge Studio mobile app home screen — which **supersede** the 2026-08-18 "preset sizes" assumption documented further below (see ["Reconciled against the original handoff document"](#reconciled-against-the-original-handoff-document-2026-08-18)). See ["Mockup reconciliation (2026-08-19)"](#mockup-reconciliation-2026-08-19) at the end of this document for the full CONFIRMED-vs-ASSUMPTION breakdown of what changed.
+
 ## Locked decisions (from spec)
 
-1. **HomeForge is a configurator, not a CAD tool or printer UI.** Customers configure dimensions, top shape, base style, material, and finish/color. They never see slicer settings, nozzle/print-profile controls, or any machine/routing UI. All of that stays internal to manufacturing operations (out of scope for this build).
-2. **Every ordered table gets a persistent digital twin.** A `DigitalTwin` record is created at order time, linked to the `Order` and the locked `DesignVersion`, carrying a physical identifier (`HF-{year}-{6-digit order id}`), status, and (via `QualificationRecord`) production/inspection history.
+1. **NestForge Studio is a configurator, not a CAD tool or printer UI.** Customers configure a curated base table, center design, material, and laminate finish/color. They never see slicer settings, nozzle/print-profile controls, or any machine/routing UI. All of that stays internal to manufacturing operations (out of scope for this build). *(Superseded 2026-08-19: the original spec's "dimensions, top shape, base style" customer controls were replaced by the base-table-catalog model — see "Mockup reconciliation" below.)*
+2. **Every ordered table gets a persistent digital twin.** A `DigitalTwin` record is created at order time, linked to the `Order` and the locked `DesignVersion`, carrying a physical identifier (`NF-{year}-{6-digit order id}`), status, and (via `QualificationRecord`) production/inspection history. *(Prefix updated 2026-08-19 from `HF-` to `NF-` to match the NestForge rebrand.)*
 3. **Pre-shipment qualification is part of the product**, not an afterthought. A `QualificationRecord` (status, inspection notes, `qualified` boolean) is attached to the twin, and a qualification "sticker" (identifier + status + inspection metadata + a decorative, non-scannable QR placeholder) is shown as a preview on the Review page and live on the Track page.
 4. **Sharing/remix is explicitly Phase 2.** Nothing in this build depends on it, and no UI stubs were added that would need to be un-shipped later.
 5. **Production constraints are configurable data, not hard-coded engineering values.** All manufacturability limits (width/depth/height ranges, wall thickness, minimum leg diameter, per-material density/speed factors, estimation constants) live in [`config/production-constraints.json`](../config/production-constraints.json), which is explicitly annotated with `$comment` fields and a `revision: "placeholder-v1"` flag stating these are placeholders pending real printer/process specs — not production-ready manufacturing values.
@@ -43,3 +45,40 @@ Two things the product owner asked for in this session are **not** explicitly de
 
 - **Real:** Postgres persistence for all five entities, the manufacturability validation engine reading live from the config file, immutable version history, the R3F 3D preview driven by the same params as validation, and the digital-twin/qualification-record creation and status-sync flow.
 - **Mocked/placeholder (clearly labeled in the UI):** payment processing at Checkout, the qualification sticker's QR code (decorative, not scannable), the pre-order qualification sticker preview, and the Track page's production-status progression (advanced only via the "Simulate next update" demo button and the admin exception panel — no real printer/production system is connected).
+
+## Mockup reconciliation (2026-08-19)
+
+On 2026-08-19 the product owner (Chris Ritchie) provided three real ChatGPT-generated product mockup images that were not available when the 2026-08-18 reconciliation above was written:
+
+1. A circular **pre-ship qualification sticker** (black/gold/cream badge design).
+2. A **build-instruction reference sheet** (printer spec, budget, base table, center-pattern close-up).
+3. The **NestForge Studio mobile app home screen** (before/after hero, Explore Designs / Create Your Own cards, Choose a Table banner, bottom tab nav).
+
+These are treated as the authoritative source of truth going forward, superseding the 2026-08-18 "three size presets" assumption (item 2 in the previous reconciliation section) everywhere they conflict. `config/production-constraints.json` was rebuilt to `revision: "v2-mockup-aligned"` with per-field `$comment` tags; the full CONFIRMED / ASSUMPTION / PLACEHOLDER breakdown is:
+
+**CONFIRMED (came directly from the mockup images):**
+- Printer: Bambu Lab P1S, 256 × 256 × 256 mm build volume (build-instruction sheet, Section 1).
+- Budget: $150 total (build-instruction sheet, Section 1).
+- Base table: IKEA LACK Coffee Table, Black Brown, $49.99, 1200 × 780 × 450 mm / 47¼ × 30¾ × 17¾ in (build-instruction sheet, Section 2).
+- Center design "Flowing Waves" — the sculptural ripple pattern shown in both the build-instruction sheet's center-pattern close-up (Section 3) and the app home-screen imagery.
+- Product model shape: **base table → center design → material → laminate finish**, replacing free-form width/depth/height entry entirely — dimensions are never typed in, only derived from the selected base table (matches the app mockup's "CHOOSE A TABLE / Select your base from our curated collection" flow).
+- Qualification sticker layout: circular black/gold/cream badge, five per-checkpoint status icons, a "QUALIFIED FOR NESTFORGE FIT GUARANTEE" banner, QR + qualification-ID/date block, a NestForge quality seal, and curved rim text — rebuilt pixel-for-pixel in `QualificationSticker.tsx` against the sticker mockup.
+- App branding and IA: NestForge Studio name/wordmark, bottom tab nav (Home / Tables / Create / Saved / Account), before/after hero framing, Explore Designs vs. Create Your Own split — all taken directly from the app home-screen mockup and reflected in `Landing.tsx` / `BottomMobileNav.tsx`.
+
+**ASSUMPTION (a specific number wasn't given, but a defensible value was derived from the mockups):**
+- `centerSectionWidthMm: 720` on the LACK base table (60% center / 20% each end) — estimated from the build-instruction sheet's top-view proportions; no source gives this as an explicit number.
+
+**PLACEHOLDER (not in any source mockup — added only so multi-option UI has something to show, and explicitly flagged `confirmed: false` in the config so they're easy to find and replace):**
+- Two additional base tables (`curated-walnut-frame`, `curated-compact-black`) — added so the "curated collection" browsing screen has more than one option.
+- Two additional center designs (`concentric-rings`, `geometric-facets`) — added so "Explore Designs / browse and remix" has more than one design.
+- All three print materials' density/speed factors, and the `baseHoursPerLiter: 6.5` print-time heuristic — none of the mockups specify real slicer/material data.
+- The four laminate finish options (Warm Oak, Charcoal, Bone White, Espresso Walnut) — reasonable finish names for the end panels; not present in the source mockups.
+
+### Qualification sticker bug fix (2026-08-19)
+
+The first implementation of `QualificationSticker.tsx` against the sticker mockup had a geometry bug: the QR code, qualification-ID/date text block, and the curved footer rim text could overlap the cream content background or the checkpoint/fit-guarantee rows above it, because those elements' positions and their enclosing cream-colored background rectangle were computed independently instead of against a shared boundary. Fixed by:
+
+- Compressing the checkpoint-icon row and fit-guarantee row slightly so the cream section starts higher.
+- Giving the cream background its own dedicated inner clip circle (radius 178, same center as the sticker), strictly smaller than the footer arc's radius (196) — so the cream area and the curved footer text can never overlap again, by construction, rather than by careful coordinate tuning.
+- Re-deriving the QR code, ID/date text, divider, and quality-seal positions against that new boundary, verifying every element's farthest corner stays safely inside the 178-radius cream clip.
+- Verified via rendered screenshots (both `qualified={true}` and `qualified={false}` states, at 1x and 2x resolution) that no clipping or overlap remains, on both the standalone component and in context on the full Review page (desktop and mobile).

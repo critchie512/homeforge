@@ -1,31 +1,92 @@
 {
-  "$comment": "PLACEHOLDER MANUFACTURABILITY LIMITS. These numbers are NOT real engineering values — actual printer/production limits are still unknown at the time this file was written. Every field here exists so the validation engine and the UI read limits from configurable data instead of hard-coded constants. Replace with real values once the manufacturing team confirms machine/process specs, then bump `revision` and note the change in docs/DECISIONS.md.",
-  "revision": "placeholder-v1",
+  "$comment": "Rebuilt from the real product mockups the owner provided (pre-ship qualification sticker, build-instruction reference sheet, and the NestForge Studio app home screen). Every field is tagged CONFIRMED (came directly from those source images) or an explicit ASSUMPTION/PLACEHOLDER (a reasonable implementation choice made where the sources don't give exact numbers). See docs/DECISIONS.md 'Mockup reconciliation' section for the full writeup.",
+  "revision": "v2-mockup-aligned",
   "units": {
     "dimensions": "mm",
-    "wallThickness": "mm",
     "weight": "kg",
     "printTime": "hours"
   },
-  "dimensions": {
-    "width": { "min": 600, "max": 1800, "$comment": "PLACEHOLDER — coffee table width range" },
-    "depth": { "min": 400, "max": 1000, "$comment": "PLACEHOLDER — coffee table depth range" },
-    "height": { "min": 350, "max": 550, "$comment": "PLACEHOLDER — coffee table height range" }
+  "printer": {
+    "id": "bambu-lab-p1s",
+    "label": "Bambu Lab P1S",
+    "buildVolumeMm": { "width": 256, "depth": 256, "height": 256 },
+    "$comment": "CONFIRMED — build-instruction mockup, Section 1 (Printer: Bambu Lab P1S, 256 x 256 x 256 mm build volume)."
   },
-  "structure": {
-    "minWallThicknessMm": 4,
-    "maxWallThicknessMm": 20,
-    "defaultWallThicknessMm": 8,
-    "minLegDiameterMm": 30,
-    "$comment": "PLACEHOLDER — wall/leg thickness bounds for print strength; pending real slicer/material data"
+  "budget": {
+    "targetTotalUsd": 150,
+    "$comment": "CONFIRMED — build-instruction mockup, Section 1 (Budget: $150 total)."
   },
+  "baseTables": [
+    {
+      "id": "ikea-lack-black-brown",
+      "label": "LACK Coffee Table — Black Brown",
+      "vendor": "IKEA",
+      "priceUsd": 49.99,
+      "widthMm": 1200,
+      "depthMm": 780,
+      "heightMm": 450,
+      "centerSectionWidthMm": 720,
+      "productUrl": "https://www.ikea.com/us/en/p/lack-coffee-table-black-brown-90449905/",
+      "confirmed": true,
+      "$comment": "CONFIRMED base table, vendor, price and overall dimensions from the build-instruction mockup Section 2 (47 1/4in L x 30 3/4in W x 17 3/4in H / 120 x 78 x 45 cm). centerSectionWidthMm — how much of the width is the 3-D printed center vs. the laminate end panels — is NOT given as a number anywhere in the source materials; 720mm (60% center / 20% each end) is an ASSUMPTION estimated from the top-view mockup image proportions."
+    },
+    {
+      "id": "curated-walnut-frame",
+      "label": "Walnut-Frame Coffee Table",
+      "vendor": "Curated supplier (placeholder)",
+      "priceUsd": 89.0,
+      "widthMm": 1100,
+      "depthMm": 700,
+      "heightMm": 430,
+      "centerSectionWidthMm": 660,
+      "productUrl": null,
+      "confirmed": false,
+      "$comment": "PLACEHOLDER — not present in any source material. Added only so the 'curated collection' browsing screen (seen in the app mockup: CHOOSE A TABLE / BROWSE TABLES) has more than one option to show. Replace with a real second approved base table, or remove this entry, once the company has one."
+    },
+    {
+      "id": "curated-compact-black",
+      "label": "Compact Black Coffee Table",
+      "vendor": "Curated supplier (placeholder)",
+      "priceUsd": 59.0,
+      "widthMm": 950,
+      "depthMm": 600,
+      "heightMm": 400,
+      "centerSectionWidthMm": 570,
+      "productUrl": null,
+      "confirmed": false,
+      "$comment": "PLACEHOLDER — same caveat as curated-walnut-frame above."
+    }
+  ],
+  "centerDesigns": [
+    {
+      "id": "flowing-waves",
+      "label": "Flowing Waves",
+      "description": "A sculptural, flowing ripple pattern across all three center tiles — the signature NestForge design.",
+      "confirmed": true,
+      "$comment": "CONFIRMED — matches the wave/ripple pattern shown in both the build-instruction mockup (Section 3: Close-Up of 3-D Printed Center Pattern) and the app home-screen mockup imagery."
+    },
+    {
+      "id": "concentric-rings",
+      "label": "Concentric Rings",
+      "description": "Rippling concentric rings radiating from the center tile.",
+      "confirmed": false,
+      "$comment": "PLACEHOLDER — not in the source mockups. Added so 'Explore Designs / browse and remix' (app mockup) has more than one design to browse."
+    },
+    {
+      "id": "geometric-facets",
+      "label": "Geometric Facets",
+      "description": "Angular, faceted low-poly relief pattern.",
+      "confirmed": false,
+      "$comment": "PLACEHOLDER — same caveat as concentric-rings above."
+    }
+  ],
   "materials": [
     {
       "id": "pla-matte",
       "label": "Matte PLA",
       "densityKgPerM3": 1240,
       "printSpeedFactor": 1.0,
-      "$comment": "PLACEHOLDER density/speed factor used only to compute estimated weight & print time"
+      "$comment": "PLACEHOLDER density/speed factor used only to compute estimated weight & print time — not a real slicer output."
     },
     {
       "id": "petg-tough",
@@ -42,41 +103,14 @@
       "$comment": "PLACEHOLDER"
     }
   ],
-  "finishes": [
-    { "id": "charcoal", "label": "Charcoal" },
+  "laminateFinishes": [
     { "id": "warm-oak", "label": "Warm Oak" },
-    { "id": "forge-orange", "label": "Forge Orange" },
-    { "id": "bone-white", "label": "Bone White" }
+    { "id": "charcoal", "label": "Charcoal" },
+    { "id": "bone-white", "label": "Bone White" },
+    { "id": "espresso-walnut", "label": "Espresso Walnut" }
   ],
-  "sizePresets": [
-    {
-      "id": "compact",
-      "label": "Compact",
-      "description": "Fits small living rooms and apartments",
-      "widthMm": 800,
-      "depthMm": 500,
-      "heightMm": 400
-    },
-    {
-      "id": "standard",
-      "label": "Standard",
-      "description": "Our most popular size for typical living rooms",
-      "widthMm": 1100,
-      "depthMm": 600,
-      "heightMm": 420
-    },
-    {
-      "id": "large",
-      "label": "Large",
-      "description": "A statement piece for larger living spaces",
-      "widthMm": 1500,
-      "depthMm": 750,
-      "heightMm": 450
-    }
-  ],
-  "$comment_sizePresets": "PRODUCT DECISION (not a printer limit): customers choose from these three supported/approved sizes rather than free-form width/depth/height sliders. Each preset's dimensions still fall within the dimensions.* min/max bounds above, so validateTableDesign() continues to check every preset against real manufacturability limits. Add or adjust presets here — never hard-code them in the client.",
   "estimation": {
     "baseHoursPerLiter": 6.5,
-    "$comment": "PLACEHOLDER — rough hours-per-liter-of-material heuristic for the estimated print time shown to customers. Not derived from a real slicer."
+    "$comment": "PLACEHOLDER — rough hours-per-liter-of-material heuristic for the estimated print time shown to customers. Not derived from a real slicer. Applies only to the 3-D printed center tiles, since the base table and laminate end panels are not printed."
   }
 }

@@ -6,29 +6,28 @@ import { TopNav } from "@/components/TopNav";
 import { StepSidebar, type StepDef } from "@/components/StepSidebar";
 import { TablePreview } from "@/components/TablePreview";
 import { ValidationPanel } from "@/components/ValidationPanel";
-import { getFinishPreviewColor } from "@/lib/finishColors";
+import { getLaminateFinishPreviewColor } from "@/lib/finishColors";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Loader2, ChevronLeft, ChevronRight, Save } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, Save, Sparkles, Waves } from "lucide-react";
 import {
   DEFAULT_TABLE_PARAMS,
-  TOP_SHAPES,
-  BASE_STYLES,
-  applySizePreset,
+  applyBaseTable,
   validateTableDesign,
   type TableParams,
   type ProductionConstraints,
-  type SizePreset,
+  type BaseTable,
+  type CenterDesign,
   type ValidationResult,
 } from "@shared/tableDesign";
 import type { DesignVersion, Project } from "@shared/schema";
 
 const STEPS: StepDef[] = [
-  { key: "dimensions", label: "Size", description: "Choose a supported size" },
-  { key: "top", label: "Top", description: "Shape of the tabletop" },
-  { key: "base", label: "Base", description: "Legs or pedestal style" },
-  { key: "material", label: "Material / Color", description: "Print material & finish" },
+  { key: "base-table", label: "Base Table", description: "Choose your curated base" },
+  { key: "center-design", label: "Center Design", description: "Browse designs or create your own" },
+  { key: "material", label: "Material", description: "Print material for the center" },
+  { key: "laminate", label: "Laminate Finish", description: "Color for the end panels" },
   { key: "review", label: "Review", description: "Check & save this version" },
 ];
 
@@ -91,8 +90,7 @@ export default function Configure() {
   };
   const goBack = () => setStepIndex((i) => Math.max(i - 1, 0));
 
-  const finishColor = getFinishPreviewColor(params.finishId);
-  const sizePresets = constraintsQuery.data?.sizePresets;
+  const laminateColor = getLaminateFinishPreviewColor(params.laminateFinishId);
 
   return (
     <div className="min-h-screen">
@@ -118,17 +116,29 @@ export default function Configure() {
 
           <section className="min-w-0 space-y-6">
             <div className="aspect-[4/3] overflow-hidden rounded-xl border border-card-border bg-black">
-              <TablePreview params={params} finishColor={finishColor} />
+              <TablePreview params={params} laminateColor={laminateColor} />
             </div>
 
             <div className="rounded-xl border border-card-border bg-card p-6">
-              {stepIndex === 0 && sizePresets && (
-                <SizeStep params={params} presets={sizePresets} onChange={update} />
+              {stepIndex === 0 && constraintsQuery.data && (
+                <BaseTableStep
+                  params={params}
+                  baseTables={constraintsQuery.data.baseTables}
+                  onChange={update}
+                />
               )}
-              {stepIndex === 1 && <TopStep params={params} onChange={update} />}
-              {stepIndex === 2 && <BaseStep params={params} onChange={update} />}
-              {stepIndex === 3 && constraintsQuery.data && (
+              {stepIndex === 1 && constraintsQuery.data && (
+                <CenterDesignStep
+                  params={params}
+                  designs={constraintsQuery.data.centerDesigns}
+                  onChange={update}
+                />
+              )}
+              {stepIndex === 2 && constraintsQuery.data && (
                 <MaterialStep params={params} constraints={constraintsQuery.data} onChange={update} />
+              )}
+              {stepIndex === 3 && constraintsQuery.data && (
+                <LaminateStep params={params} constraints={constraintsQuery.data} onChange={update} />
               )}
               {stepIndex === 4 && (
                 <ReviewStep
@@ -182,44 +192,52 @@ export default function Configure() {
   );
 }
 
-function SizeStep({
+function BaseTableStep({
   params,
-  presets,
+  baseTables,
   onChange,
 }: {
   params: TableParams;
-  presets: SizePreset[];
+  baseTables: BaseTable[];
   onChange: (patch: Partial<TableParams>) => void;
 }) {
   return (
     <div>
-      <Label className="mb-1 block">Size</Label>
+      <Label className="mb-1 block">Base table</Label>
       <p className="mb-4 text-xs text-muted-foreground">
-        Every HomeForge table ships in one of these supported sizes — each one is pre-approved
-        against our production limits, so there's nothing to second-guess.
+        Every table starts from one of these curated base tables — each one is pre-approved
+        against our production limits, so there's nothing to second-guess. Dimensions come from
+        the base table you pick, not from typing numbers in.
       </p>
       <RadioGroup
-        value={params.sizePresetId}
+        value={params.baseTableId}
         onValueChange={(id) => {
-          const preset = presets.find((p) => p.id === id);
-          if (preset) onChange(applySizePreset(preset));
+          const table = baseTables.find((t) => t.id === id);
+          if (table) onChange(applyBaseTable(table));
         }}
-        className="grid gap-3 sm:grid-cols-3"
+        className="grid gap-3 sm:grid-cols-2"
       >
-        {presets.map((preset) => (
+        {baseTables.map((table) => (
           <label
-            key={preset.id}
+            key={table.id}
             className={`hover-elevate flex cursor-pointer flex-col gap-2 rounded-lg border p-4 ${
-              params.sizePresetId === preset.id ? "border-primary" : "border-card-border"
+              params.baseTableId === table.id ? "border-primary" : "border-card-border"
             }`}
-            data-testid={`option-size-${preset.id}`}
+            data-testid={`option-base-table-${table.id}`}
           >
-            <RadioGroupItem value={preset.id} className="sr-only" />
-            <span className="text-sm font-medium">{preset.label}</span>
-            <span className="text-xs text-muted-foreground">{preset.description}</span>
-            <span className="mt-1 text-xs font-medium tabular-nums text-primary">
-              {preset.widthMm} × {preset.depthMm} × {preset.heightMm} mm
+            <RadioGroupItem value={table.id} className="sr-only" />
+            <span className="text-sm font-medium">{table.label}</span>
+            <span className="text-xs text-muted-foreground">
+              {table.vendor} · ${table.priceUsd.toFixed(2)}
             </span>
+            <span className="mt-1 text-xs font-medium tabular-nums text-primary">
+              {table.widthMm} × {table.depthMm} × {table.heightMm} mm
+            </span>
+            {!table.confirmed && (
+              <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                Curated pick — coming soon
+              </span>
+            )}
           </label>
         ))}
       </RadioGroup>
@@ -227,89 +245,69 @@ function SizeStep({
   );
 }
 
-function TopStep({
+function CenterDesignStep({
   params,
+  designs,
   onChange,
 }: {
   params: TableParams;
+  designs: CenterDesign[];
   onChange: (patch: Partial<TableParams>) => void;
 }) {
-  const labels: Record<string, string> = { rectangle: "Rectangle", round: "Round", oval: "Oval" };
   return (
-    <div>
-      <Label className="mb-3 block">Top shape</Label>
-      <RadioGroup
-        value={params.topShape}
-        onValueChange={(v) => onChange({ topShape: v as TableParams["topShape"] })}
-        className="grid grid-cols-3 gap-3"
-      >
-        {TOP_SHAPES.map((shape) => (
-          <label
-            key={shape}
-            className={`hover-elevate flex cursor-pointer flex-col items-center gap-2 rounded-lg border p-4 ${
-              params.topShape === shape ? "border-primary" : "border-card-border"
-            }`}
-            data-testid={`option-top-${shape}`}
-          >
-            <RadioGroupItem value={shape} className="sr-only" />
-            <ShapeGlyph shape={shape} />
-            <span className="text-sm">{labels[shape]}</span>
-          </label>
-        ))}
-      </RadioGroup>
-    </div>
-  );
-}
+    <div className="space-y-6">
+      <div>
+        <Label className="mb-1 block">Center design</Label>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Pick a design from the gallery, or start from a blank slate and we'll follow up to
+          finalize a custom pattern with you.
+        </p>
+        <RadioGroup
+          value={params.isCustomDesign ? "" : params.centerDesignId}
+          onValueChange={(id) => onChange({ centerDesignId: id, isCustomDesign: false })}
+          className="grid gap-3 sm:grid-cols-3"
+        >
+          {designs.map((design) => (
+            <label
+              key={design.id}
+              className={`hover-elevate flex cursor-pointer flex-col gap-2 rounded-lg border p-4 ${
+                !params.isCustomDesign && params.centerDesignId === design.id
+                  ? "border-primary"
+                  : "border-card-border"
+              }`}
+              data-testid={`option-center-design-${design.id}`}
+            >
+              <RadioGroupItem value={design.id} className="sr-only" />
+              <Waves className="h-6 w-6 text-primary" aria-hidden="true" />
+              <span className="text-sm font-medium">{design.label}</span>
+              <span className="text-xs text-muted-foreground">{design.description}</span>
+              {!design.confirmed && (
+                <span className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  Gallery pick — coming soon
+                </span>
+              )}
+            </label>
+          ))}
+        </RadioGroup>
+      </div>
 
-function ShapeGlyph({ shape }: { shape: string }) {
-  if (shape === "round") {
-    return <div className="h-10 w-10 rounded-full border-2 border-current" aria-hidden="true" />;
-  }
-  if (shape === "oval") {
-    return <div className="h-8 w-12 rounded-full border-2 border-current" aria-hidden="true" />;
-  }
-  return <div className="h-8 w-12 rounded-sm border-2 border-current" aria-hidden="true" />;
-}
-
-function BaseStep({
-  params,
-  onChange,
-}: {
-  params: TableParams;
-  onChange: (patch: Partial<TableParams>) => void;
-}) {
-  const labels: Record<string, string> = {
-    pedestal: "Pedestal",
-    "four-leg": "Four-leg",
-    trestle: "Trestle",
-  };
-  const descriptions: Record<string, string> = {
-    pedestal: "Single center column",
-    "four-leg": "Classic four corner legs",
-    trestle: "Two end panels with a stretcher",
-  };
-  return (
-    <div>
-      <Label className="mb-3 block">Base style</Label>
-      <RadioGroup
-        value={params.baseStyle}
-        onValueChange={(v) => onChange({ baseStyle: v as TableParams["baseStyle"] })}
-        className="grid gap-3 sm:grid-cols-3"
+      <button
+        type="button"
+        onClick={() => onChange({ isCustomDesign: true })}
+        className={`hover-elevate flex w-full cursor-pointer items-center gap-3 rounded-lg border p-4 text-left ${
+          params.isCustomDesign ? "border-primary" : "border-card-border"
+        }`}
+        data-testid="option-create-your-own"
       >
-        {BASE_STYLES.map((style) => (
-          <label
-            key={style}
-            className={`hover-elevate flex cursor-pointer flex-col gap-1 rounded-lg border p-4 ${
-              params.baseStyle === style ? "border-primary" : "border-card-border"
-            }`}
-            data-testid={`option-base-${style}`}
-          >
-            <RadioGroupItem value={style} className="sr-only" />
-            <span className="text-sm font-medium">{labels[style]}</span>
-            <span className="text-xs text-muted-foreground">{descriptions[style]}</span>
-          </label>
-        ))}
-      </RadioGroup>
+        <Sparkles className="h-6 w-6 text-primary" aria-hidden="true" />
+        <div>
+          <span className="block text-sm font-medium">Create your own</span>
+          <span className="block text-xs text-muted-foreground">
+            Tell us your idea — we'll follow up to design a fully custom center pattern with you
+            before production.
+          </span>
+        </div>
+      </button>
     </div>
   );
 }
@@ -324,70 +322,75 @@ function MaterialStep({
   onChange: (patch: Partial<TableParams>) => void;
 }) {
   return (
-    <div className="space-y-6">
-      <div>
-        <Label className="mb-3 block">Print material</Label>
-        <RadioGroup
-          value={params.materialId}
-          onValueChange={(v) => onChange({ materialId: v })}
-          className="grid gap-3 sm:grid-cols-3"
-        >
-          {constraints.materials.map((m) => (
-            <label
-              key={m.id}
-              className={`hover-elevate flex cursor-pointer flex-col gap-1 rounded-lg border p-4 ${
-                params.materialId === m.id ? "border-primary" : "border-card-border"
-              }`}
-              data-testid={`option-material-${m.id}`}
-            >
-              <RadioGroupItem value={m.id} className="sr-only" />
-              <span className="text-sm font-medium">{m.label}</span>
-            </label>
-          ))}
-        </RadioGroup>
-      </div>
-
-      <div>
-        <Label className="mb-3 block">Finish / color</Label>
-        <RadioGroup
-          value={params.finishId}
-          onValueChange={(v) => onChange({ finishId: v })}
-          className="grid grid-cols-4 gap-3"
-        >
-          {constraints.finishes.map((f) => (
-            <label
-              key={f.id}
-              className={`hover-elevate flex cursor-pointer flex-col items-center gap-2 rounded-lg border p-3 ${
-                params.finishId === f.id ? "border-primary" : "border-card-border"
-              }`}
-              data-testid={`option-finish-${f.id}`}
-            >
-              <RadioGroupItem value={f.id} className="sr-only" />
-              <span
-                className="h-8 w-8 rounded-full border border-border"
-                style={{ backgroundColor: getFinishPreviewColor(f.id) }}
-                aria-hidden="true"
-              />
-              <span className="text-xs">{f.label}</span>
-            </label>
-          ))}
-        </RadioGroup>
-      </div>
+    <div>
+      <Label className="mb-3 block">Print material</Label>
+      <p className="mb-4 text-xs text-muted-foreground">
+        This is the material used for the 3-D printed center section only — the base table and
+        laminate end panels are not printed.
+      </p>
+      <RadioGroup
+        value={params.materialId}
+        onValueChange={(v) => onChange({ materialId: v })}
+        className="grid gap-3 sm:grid-cols-3"
+      >
+        {constraints.materials.map((m) => (
+          <label
+            key={m.id}
+            className={`hover-elevate flex cursor-pointer flex-col gap-1 rounded-lg border p-4 ${
+              params.materialId === m.id ? "border-primary" : "border-card-border"
+            }`}
+            data-testid={`option-material-${m.id}`}
+          >
+            <RadioGroupItem value={m.id} className="sr-only" />
+            <span className="text-sm font-medium">{m.label}</span>
+          </label>
+        ))}
+      </RadioGroup>
     </div>
   );
 }
 
-const TOP_SHAPE_LABELS: Record<string, string> = {
-  rectangle: "Rectangle",
-  round: "Round",
-  oval: "Oval",
-};
-
-const BASE_STYLE_LABELS: Record<string, string> = {
-  pedestal: "Pedestal",
-  "four-leg": "Four-leg",
-  trestle: "Trestle",
-};
+function LaminateStep({
+  params,
+  constraints,
+  onChange,
+}: {
+  params: TableParams;
+  constraints: ProductionConstraints;
+  onChange: (patch: Partial<TableParams>) => void;
+}) {
+  return (
+    <div>
+      <Label className="mb-3 block">Laminate finish</Label>
+      <p className="mb-4 text-xs text-muted-foreground">
+        Applied to the two end panels that flank the printed center section.
+      </p>
+      <RadioGroup
+        value={params.laminateFinishId}
+        onValueChange={(v) => onChange({ laminateFinishId: v })}
+        className="grid grid-cols-4 gap-3"
+      >
+        {constraints.laminateFinishes.map((f) => (
+          <label
+            key={f.id}
+            className={`hover-elevate flex cursor-pointer flex-col items-center gap-2 rounded-lg border p-3 ${
+              params.laminateFinishId === f.id ? "border-primary" : "border-card-border"
+            }`}
+            data-testid={`option-laminate-${f.id}`}
+          >
+            <RadioGroupItem value={f.id} className="sr-only" />
+            <span
+              className="h-8 w-8 rounded-full border border-border"
+              style={{ backgroundColor: getLaminateFinishPreviewColor(f.id) }}
+              aria-hidden="true"
+            />
+            <span className="text-xs">{f.label}</span>
+          </label>
+        ))}
+      </RadioGroup>
+    </div>
+  );
+}
 
 function ReviewStep({
   params,
@@ -402,28 +405,28 @@ function ReviewStep({
   onSave: () => void;
   isSaving: boolean;
 }) {
+  const baseTable = constraints?.baseTables.find((t) => t.id === params.baseTableId);
+  const centerDesign = constraints?.centerDesigns.find((d) => d.id === params.centerDesignId);
+  const material = constraints?.materials.find((m) => m.id === params.materialId);
+  const laminate = constraints?.laminateFinishes.find((f) => f.id === params.laminateFinishId);
+
   return (
     <div className="space-y-4">
       <h3 className="text-sm font-medium text-muted-foreground">Summary</h3>
       <dl className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
+        <SummaryItem label="Base table" value={baseTable?.label ?? params.baseTableId} plain />
         <SummaryItem
-          label="Size"
-          value={
-            constraints?.sizePresets.find((p) => p.id === params.sizePresetId)?.label ??
-            params.sizePresetId
-          }
+          label="Overall size"
+          value={`${params.widthMm} × ${params.depthMm} × ${params.heightMm} mm`}
           plain
         />
-        <SummaryItem label="Dimensions" value={`${params.widthMm} × ${params.depthMm} × ${params.heightMm} mm`} plain />
-        <SummaryItem label="Top" value={TOP_SHAPE_LABELS[params.topShape] ?? params.topShape} plain />
-        <SummaryItem label="Base" value={BASE_STYLE_LABELS[params.baseStyle] ?? params.baseStyle} plain />
         <SummaryItem
-          label="Finish"
-          value={
-            constraints?.finishes.find((f) => f.id === params.finishId)?.label ?? params.finishId
-          }
+          label="Center design"
+          value={params.isCustomDesign ? "Create your own (pending review)" : centerDesign?.label ?? params.centerDesignId}
           plain
         />
+        <SummaryItem label="Material" value={material?.label ?? params.materialId} plain />
+        <SummaryItem label="Laminate finish" value={laminate?.label ?? params.laminateFinishId} plain />
       </dl>
       <p className="text-xs text-muted-foreground">
         Saving creates a new, immutable design version. Once saved, this exact version can't be

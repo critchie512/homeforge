@@ -5,7 +5,7 @@ import { TopNav } from "@/components/TopNav";
 import { ValidationPanel } from "@/components/ValidationPanel";
 import { TablePreview } from "@/components/TablePreview";
 import { QualificationSticker } from "@/components/QualificationSticker";
-import { getFinishPreviewColor } from "@/lib/finishColors";
+import { getLaminateFinishPreviewColor } from "@/lib/finishColors";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Lock, ArrowRight } from "lucide-react";
@@ -30,7 +30,7 @@ export default function Review() {
     if (!version) return null;
     // Deterministic placeholder identifier shown pre-order — the real,
     // persistent DigitalTwin record is created once an Order exists.
-    return `HF-PREVIEW-${String(projectId).padStart(4, "0")}-V${version.version}`;
+    return `NF-PREVIEW-${String(projectId).padStart(4, "0")}-V${version.version}`;
   }, [projectId, version]);
 
   if (latestVersionQuery.isLoading) {
@@ -87,7 +87,7 @@ export default function Review() {
         <div className="mt-8 grid gap-8 md:grid-cols-[1fr_360px]">
           <section className="space-y-6">
             <div className="aspect-[4/3] overflow-hidden rounded-xl border border-card-border bg-black">
-              <TablePreview params={params} finishColor={getFinishPreviewColor(params.finishId)} />
+              <TablePreview params={params} laminateColor={getLaminateFinishPreviewColor(params.laminateFinishId)} />
             </div>
 
             <div className="rounded-xl border border-card-border bg-card p-6">

@@ -3,11 +3,13 @@
 @tailwind utilities;
 
 /* ---------------------------------------------------------------------------
-   HomeForge palette — industrial-craft / premium-manufacturing.
-   Near-black surfaces (forge shop at rest) + warm kiln-orange accent
-   (forge/kiln warmth). Light mode is a warm off-white workshop variant,
-   kept for accessibility/system-preference users; dark is the primary,
-   intended brand experience.
+   NestForge Studio palette — matched to the actual product mockups (see
+   docs/DECISIONS.md "Mockup reconciliation" section): near-black surfaces,
+   a warm bronze/gold accent (the qualification-sticker band color), and a
+   cream tertiary for light text-on-dark and paper-like surfaces. Light mode
+   is a warm off-white variant kept for accessibility/system-preference
+   users; dark is the primary, intended brand experience shown in the
+   mockups.
 --------------------------------------------------------------------------- */
 
 /* LIGHT MODE */
@@ -35,26 +37,27 @@
   --popover: 30 25% 98%;
   --popover-foreground: 20 15% 12%;
   --popover-border: 25 14% 89%;
-  --primary: 22 88% 52%;
+  --primary: 36 58% 48%;
   --primary-foreground: 20 15% 8%;
   --secondary: 25 18% 91%;
   --secondary-foreground: 20 15% 12%;
   --muted: 25 16% 92%;
   --muted-foreground: 22 8% 42%;
-  --accent: 20 65% 90%;
+  --accent: 32 45% 88%;
   --accent-foreground: 20 15% 12%;
   --destructive: 6 74% 45%;
   --destructive-foreground: 30 25% 99%;
   --input: 25 14% 80%;
-  --ring: 22 88% 52%;
-  --chart-1: 22 88% 52%;
-  --chart-2: 40 85% 55%;
+  --ring: 36 58% 48%;
+  --chart-1: 36 58% 48%;
+  --chart-2: 40 70% 58%;
   --chart-3: 173 40% 38%;
   --chart-4: 12 65% 48%;
   --chart-5: 200 30% 45%;
   --font-sans: 'Satoshi', 'Inter', sans-serif;
   --font-display: 'Cabinet Grotesk', 'Satoshi', sans-serif;
-  --font-serif: Georgia, serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-brand: 'Cormorant Garamond', Georgia, serif;
   --font-mono: 'JetBrains Mono', Menlo, monospace;
   --radius: 0.5rem;
   --shadow-2xs: 0px 1px 2px 0px hsl(20 30% 8% / 0.04);
@@ -98,7 +101,7 @@
   );
 }
 
-/* DARK MODE — primary HomeForge experience: near-black forge shop + kiln orange */
+/* DARK MODE — primary NestForge Studio experience: near-black surfaces + warm bronze/gold, matched to the mockups */
 .dark {
   --button-outline: rgba(255, 255, 255, 0.1);
   --badge-outline: rgba(255, 255, 255, 0.06);
@@ -115,28 +118,28 @@
   --sidebar: 20 13% 7%;
   --sidebar-foreground: 30 15% 94%;
   --sidebar-border: 22 10% 14%;
-  --sidebar-primary: 24 92% 55%;
+  --sidebar-primary: 36 62% 54%;
   --sidebar-primary-foreground: 20 15% 8%;
   --sidebar-accent: 22 12% 15%;
   --sidebar-accent-foreground: 30 15% 94%;
-  --sidebar-ring: 24 92% 55%;
+  --sidebar-ring: 36 62% 54%;
   --popover: 20 12% 9%;
   --popover-foreground: 30 15% 94%;
   --popover-border: 22 10% 16%;
-  --primary: 24 92% 55%;
+  --primary: 36 62% 54%;
   --primary-foreground: 20 20% 8%;
   --secondary: 22 10% 15%;
   --secondary-foreground: 30 15% 94%;
   --muted: 22 10% 14%;
   --muted-foreground: 25 8% 62%;
-  --accent: 22 30% 18%;
-  --accent-foreground: 30 15% 94%;
+  --accent: 34 40% 20%;
+  --accent-foreground: 34 45% 88%;
   --destructive: 6 70% 52%;
   --destructive-foreground: 30 15% 96%;
   --input: 22 10% 20%;
-  --ring: 24 92% 55%;
-  --chart-1: 24 92% 55%;
-  --chart-2: 40 85% 58%;
+  --ring: 36 62% 54%;
+  --chart-1: 36 62% 54%;
+  --chart-2: 40 70% 60%;
   --chart-3: 173 45% 45%;
   --chart-4: 12 65% 55%;
   --chart-5: 200 35% 55%;
@@ -275,7 +278,7 @@
   }
 }
 
-/* HomeForge-specific utility: subtle kiln-glow used sparingly on hero/CTA moments */
+/* NestForge Studio-specific utility: subtle kiln-glow used sparingly on hero/CTA moments */
 .hf-glow {
   box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35), 0 8px 24px -8px hsl(var(--primary) / 0.45);
 }

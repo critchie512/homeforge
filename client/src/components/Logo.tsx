@@ -1,15 +1,21 @@
+import type { CSSProperties } from "react";
+
 interface LogoProps {
   className?: string;
   size?: number;
+  style?: CSSProperties;
 }
 
 /**
- * HomeForge logomark — a geometric tabletop-on-anvil silhouette rendered as
- * inline SVG. Monochrome via currentColor so it adapts to light/dark theme
- * and any text color context. Designed to hold up at 24px (header) and
- * 200px (marketing / favicon-scale contexts).
+ * NestForge Studio logomark — an interlocking chevron/diamond mark, matched
+ * to the mark used on the real pre-ship qualification sticker artwork the
+ * product owner provided (two offset angular strokes nesting into a
+ * diamond silhouette — read as both "N" and a forged/interlocked joint).
+ * Monochrome via currentColor so it adapts to light/dark theme and any
+ * text color context. Designed to hold up at 24px (header) and 200px
+ * (marketing / favicon-scale contexts).
  */
-export function Logo({ className, size = 24 }: LogoProps) {
+export function Logo({ className, size = 24, style }: LogoProps) {
   return (
     <svg
       width={size}
@@ -17,17 +23,27 @@ export function Logo({ className, size = 24 }: LogoProps) {
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="HomeForge logomark"
+      aria-label="NestForge Studio logomark"
       role="img"
       className={className}
+      style={style}
     >
-      {/* Tabletop slab */}
-      <rect x="3" y="7" width="26" height="5" rx="1.5" fill="currentColor" />
-      {/* Splayed legs, echoing an anvil/forge stance */}
-      <path d="M8 12L5 26H9L11.5 12H8Z" fill="currentColor" />
-      <path d="M24 12L27 26H23L20.5 12H24Z" fill="currentColor" />
-      {/* Kiln spark / accent notch at center */}
-      <path d="M14.5 12L16 16.5L17.5 12H14.5Z" fill="currentColor" />
+      {/* Outer interlocking bracket — upper-right to lower-left stroke */}
+      <path
+        d="M10 4L24 4C25.1 4 26 4.9 26 6V14L21 14V9L15 9L28 22V28C28 29.1 27.1 30 26 30"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* Inner interlocking bracket — mirrored, offset to nest with the outer one */}
+      <path
+        d="M22 28L8 28C6.9 28 6 27.1 6 26V18L11 18V23L17 23L4 10V4C4 2.9 4.9 2 6 2"
+        stroke="currentColor"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

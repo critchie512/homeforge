@@ -18,7 +18,7 @@ export default function NotFound() {
             That page doesn't exist. Head back to the start and begin a new table project.
           </p>
           <Button asChild className="mt-6" data-testid="button-404-home">
-            <Link href="/">Back to HomeForge</Link>
+            <Link href="/">Back to NestForge Studio</Link>
           </Button>
         </CardContent>
       </Card>

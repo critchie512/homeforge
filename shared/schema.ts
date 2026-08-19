@@ -3,7 +3,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // ---------------------------------------------------------------------------
-// HomeForge data model
+// NestForge Studio data model
 //
 // Keep this simple and matched to the vertical slice: Project -> DesignVersion
 // (immutable) -> Order (stub) -> DigitalTwin -> QualificationRecord.
@@ -70,7 +70,7 @@ export const digitalTwins = pgTable("digital_twins", {
   id: serial("id").primaryKey(),
   orderId: integer("order_id").notNull(),
   designVersionId: integer("design_version_id").notNull(),
-  physicalId: text("physical_id").notNull().unique(), // e.g. HF-2026-000123
+  physicalId: text("physical_id").notNull().unique(), // e.g. NF-2026-000123
   status: text("status").notNull().default("pending"), // pending | in_production | qualified | shipped | ...
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

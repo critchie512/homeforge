@@ -10,7 +10,7 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // HomeForge is a dark-first brand (forge/kiln aesthetic). Default to dark
+  // NestForge Studio is a dark-first brand (forge/kiln aesthetic). Default to dark
   // regardless of system preference, but still respect an explicit light
   // preference if the OS strongly signals it and the user hasn't toggled.
   const [theme, setTheme] = useState<Theme>("dark");

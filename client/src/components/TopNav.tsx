@@ -29,7 +29,7 @@ export function TopNav({ projectId }: TopNavProps) {
           data-testid="link-home"
         >
           <Logo size={26} className="text-primary" />
-          <span className="font-display text-sm font-semibold tracking-wide">HomeForge</span>
+          <span className="font-display text-sm font-semibold tracking-wide">NestForge Studio</span>
         </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">

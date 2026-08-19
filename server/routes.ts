@@ -59,7 +59,7 @@ function nextHappyPathStatus(current: string): string {
 
 function generatePhysicalId(orderId: number): string {
   const year = new Date().getFullYear();
-  return `HF-${year}-${String(orderId).padStart(6, "0")}`;
+  return `NF-${year}-${String(orderId).padStart(6, "0")}`;
 }
 
 export async function registerRoutes(httpServer: Server, app: Express): Promise<Server> {
