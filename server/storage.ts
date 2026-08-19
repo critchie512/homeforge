@@ -26,7 +26,18 @@ if (!process.env.DATABASE_URL) {
 
 // node-postgres driver is ASYNC — every query below is awaited and uses
 // .returning() rather than the sync .get()/.all()/.run() SQLite patterns.
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+//
+// Hosted Postgres providers (Neon, Render Postgres, Supabase, etc.) require
+// SSL. Local development Postgres does not use SSL, so we only enable it
+// when the connection string requests it or we're in production.
+const needsSsl =
+  /sslmode=require/.test(process.env.DATABASE_URL) ||
+  process.env.NODE_ENV === "production";
+
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
+});
 export const db = drizzle(pool);
 
 export interface IStorage {
