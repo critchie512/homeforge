@@ -37,6 +37,11 @@ const needsSsl =
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
+  // Netlify Functions run each request in a short-lived, concurrency-limited
+  // container — a small pool avoids exhausting Neon's connection limit when
+  // multiple function instances are warm at once.
+  max: 3,
+  idleTimeoutMillis: 10_000,
 });
 export const db = drizzle(pool);
 

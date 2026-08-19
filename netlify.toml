@@ -1,0 +1,21 @@
+[build]
+  command = "npm run db:push && npm run build:client"
+  publish = "dist/public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# API requests go to the Express app running as a Netlify Function.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+# HomeForge uses hash-based client routing (wouter/use-hash-location), so
+# every real navigation is a request for "/" with a #fragment — this just
+# covers direct loads / refreshes.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
